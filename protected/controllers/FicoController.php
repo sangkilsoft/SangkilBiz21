@@ -114,12 +114,8 @@ class FicoController extends Controller {
         if (!Yii::app()->user->isGuest)
             Yii::app()->user->mmenu = "fico";
 
-        if (isset($_POST['id'])) {
-            $this->_idacc = intval($_POST['id']);
-        } else if ($this->_idacc == null) {
-            $this->_idacc = 0;
-        }
-
+        $this->_idacc = isset($_POST['id']) ? intval($_POST['id']) : '1';
+        
         $model = new FicoNcoa;
         $criteria = new CDbCriteria;
         $criteria->condition = 'parent_id_coa =:id';
