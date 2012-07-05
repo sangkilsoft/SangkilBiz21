@@ -195,11 +195,11 @@ class SysadminController extends Controller {
 
     public function actionCreateNumgen() {
         $data = $_POST['SysNumgen'];
-
+        
         $numGen = SysNumgen::model();
         $criteria = new CDbCriteria;
         $criteria->condition = 'cdnumgen=:cdnumgen ';
-        $criteria->params = array(':cdnumgen' => $data['cdnumgen']);
+        $criteria->params = array(':cdnumgen' => $data['cdnumgen']);     
 
         $exist = $numGen->exists($criteria);
         if (!$exist) {
