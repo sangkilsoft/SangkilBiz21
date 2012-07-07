@@ -52,7 +52,7 @@ class UserMenu extends CMenu {
             'site'=>array(
             ),
             'fico'=>array(
-                array('val' => 'Chart of Account', 'url' => 'fico/coangroup', 'img'=>'/images/ico/edit-list.png'),
+                array('val' => 'Chart of Account', 'url' => 'fico/coa', 'img'=>'/images/ico/edit-list.png'),
                 array('val' => 'Setup Periode', 'url' => 'fico/periode', 'img'=>'/images/ico/tick.png'),
 //                array('val' => 'Cash In', 'url' => 'fico/glentri', 'img'=>'/images/ico/tick.png'),
 //                array('val' => 'Cash Out', 'url' => 'fico/glentri', 'img'=>'/images/ico/tick.png'),
