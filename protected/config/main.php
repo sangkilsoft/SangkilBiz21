@@ -6,7 +6,7 @@
 // CWebApplication properties can be configured here.
 return array(
     'basePath' => dirname(__FILE__) . DIRECTORY_SEPARATOR . '..',
-    'name' => 'SangkilBiz 2.0',
+    'name' => 'SangkilBiz 2.1',
     // preloading 'log' component
     'preload' => array('log'),
     // autoloading model and component classes
@@ -66,8 +66,7 @@ return array(
           '<controller:\w+>/<action:\w+>/*' => '<controller>/<action>',
           ),
           ),
-         * 
-         */
+        */
         'log' => array(
             'class' => 'CLogRouter',
             'routes' => array(
