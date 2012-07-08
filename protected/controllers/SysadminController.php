@@ -26,7 +26,7 @@ class SysadminController extends Controller {
     public function accessRules() {
         return array(
             array('allow', // allow authenticated user to perform 'create' and 'update' actions
-                //'actions' => array('create', 'update', 'admin', 'delete'),
+                'actions' => array('create', 'update', 'admin', 'delete'),
                 'users' => array('@'),
             ),
             array('deny', // deny all users
@@ -177,6 +177,7 @@ class SysadminController extends Controller {
         $model = new Userunit;
         if (isset($_POST['Userunit'])) {
             $model->attributes = $_POST['Userunit'];
+            $model->is_default = true;
             if (!$model->save())
                 $error = $model->getErrors();
         }
