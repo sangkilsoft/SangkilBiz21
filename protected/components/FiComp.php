@@ -43,10 +43,12 @@ class FiComp extends CComponent {
         try {
             $hdrmodel = new FicoGl;
             $hdrmodel->cdfigl = SysComp::getNumberDoc('GL01', '8', $hdr['cdunit']);
-
             $hdrmodel->cdunit = $hdr['cdunit'];
             $hdrmodel->dscrp = $hdr['dscrp'];
+
             $hdrmodel->gl_date = new CDbExpression("to_date('" . $hdr['gl_date'] . "','dd-mm-yyyy')");
+
+
             $hdrmodel->id_periode = FiComp::getActivePeriode();
             $hdrmodel->refnum = $hdr['refnum'];
 
@@ -58,19 +60,17 @@ class FiComp extends CComponent {
             foreach ($dtl as $rows) {
                 $dtlmodel = new FicoGldtl();
                 $dtlmodel->cdfigl = $hdrmodel->cdfigl;
-                $dtlmodel->cdfiacc = $rows['cdacc'];
 
-                //get account group --------------------------------------------
-                $acc = FicoCoa::model();
+                //get account id --------------------------------------------
+                $acc = FicoNcoa::model();
                 $criteria = new CDbCriteria;
-                $criteria->select = array('cdfigroup');
+                $criteria->select = array('id_coa');
                 $criteria->condition = 'cdfiacc=:cdfiacc';
                 $criteria->params = array(':cdfiacc' => $rows['cdacc']);
-
                 $acc = $acc->find($criteria);
                 //end get account group ----------------------------------------
 
-                $dtlmodel->cdfigroup = $acc->cdfigroup;
+                $dtlmodel->id_coa = $acc->id_coa;
                 $dtlmodel->debit = (float) str_replace(',', '', $rows['debit']);
                 $dtlmodel->kredit = (float) str_replace(',', '', $rows['kredit']);
                 if (!$dtlmodel->save()) {
@@ -79,24 +79,13 @@ class FiComp extends CComponent {
                 }
             }
 
-            $retval = array('type' => 'S', 'message' => 'GL Created, GL Num:' . $dtlmodel->cdfigl, 'val' => $dtlmodel->cdfigl);
+            $retval = array('type' => 'S', 'message' => 'GL Created :' . $dtlmodel->cdfigl, 'val' => $dtlmodel->cdfigl);
             return $retval;
         } catch (ErrorException $e) {
             print_r($e->getMessage());
             $retval = array('type' => 'S', 'message' => $e->getMessage());
             return $retval;
         }
-    }
-
-    protected function GetFiGroup($fiacc) {
-        $acc = FicoCoa::model();
-        $criteria = new CDbCriteria;
-        $criteria->select = array('cdfigroup');
-        $criteria->condition = 'cdfiacc=:cdfiacc';
-        $criteria->params = array(':cdfiacc' => $fiacc);
-
-        $acc = $acc->find($criteria);
-        return $acc->cdfigroup;
     }
 
     public function createHutang($dthutang = array()) {

@@ -113,7 +113,7 @@ class InvComp extends CComponent {
 
         try {
             $hdrmodel = new InvgrHdr;
-            $hdrmodel->gr_num = SysComp::getNumberDoc('GR01', '10', $hdr['cdunit']);
+            $hdrmodel->gr_num = SysComp::getNumberDoc('GR01', '9', $hdr['cdunit']);
             $hdrmodel->cdunit = $hdr['cdunit'];
             $hdrmodel->cdwhse = $hdr['cdwhse'];
             $hdrmodel->dscrp = $hdr['dscrp'];
@@ -202,7 +202,7 @@ class InvComp extends CComponent {
                 }
                 $i++;
             }
-            return array('type' => 'S', 'message' => 'GR Created, GR Num:' . $hdrmodel->gr_num, 'val' => $hdrmodel->gr_num);
+            return array('type' => 'S', 'message' => 'GR Num:' . $hdrmodel->gr_num, 'val' => $hdrmodel->gr_num);
         } catch (ErrorException $e) {
             $grreturn = array('type' => 'E', 'message' => $e->getMessage());
             return $grreturn;
@@ -319,7 +319,7 @@ class InvComp extends CComponent {
 
         try {
             $hdrmodel = new InvpurchHdr;
-            $hdrmodel->purch_num = SysComp::getNumberDoc('PO01', '11', $hdr['cdunit']);
+            $hdrmodel->purch_num = SysComp::getNumberDoc('PO01', '9', $hdr['cdunit']);
             $hdrmodel->id_periode = FiComp::getActivePeriode();
             $hdrmodel->dscrp = $hdr['dscrp'];
             $hdrmodel->refnum = $hdr['refnum'];
@@ -408,7 +408,7 @@ class InvComp extends CComponent {
                     } catch (ErrorException $e) {
                         return array('type' => 'E', 'message' => 'Hutang Failed');
                     }
-                    
+
                     //UPDATE ITEM PRICE
                 }
             }
@@ -561,8 +561,10 @@ class InvComp extends CComponent {
                             try {
                                 $datahdr['refnum'] = $datahdr['purch_num'];
                                 $datahdr['date_gr'] = date('d-m-Y');
-                                $datahdr['dscrp'] = 'by po update';
-                                $gr = InvComp::createGR($datahdr, $datadtl);
+                                $datahdr['dscrp'] = 'by po update';                                
+                                
+                                $gr = InvComp::createGR($datahdr, $datadtl);                                
+                                
                                 if ($gr['type'] == 'E')
                                     return $gr;
                             } catch (Exception $e) {
@@ -660,8 +662,7 @@ class InvComp extends CComponent {
                             return array('type' => 'S', 'message' => $msg);
                             break;
                         case 2:
-                            try {
-                                //gr->by_ref updplus po line, gr->by_ref new po line                            
+                            try {                          
                                 if (count($rsgr) > 0) {
                                     $datahdr['refnum'] = $datahdr['purch_num'];
                                     $datahdr['date_gr'] = date('d-m-Y');
@@ -671,7 +672,6 @@ class InvComp extends CComponent {
                                         return $gr;
                                 }
 
-                                //gi->by_ref delete po line, gi->by_fer updplus po line
                                 if (count($rsgi) > 0) {
                                     $datahdr['refnum'] = $datahdr['purch_num'];
                                     $datahdr['date_gi'] = date('d-m-Y');
@@ -685,20 +685,19 @@ class InvComp extends CComponent {
 
                             try {
                                 $datahdr['dscrp'] = "Create by purcashing";
-                                $datahdr['tglgl'] = date('d-m-Y');
+                                $datahdr['gl_date'] = date('d-m-Y');
                                 $datahdr['refnum'] = $datahdr['purch_num'];
 
-                                $datadtl[0]['cdacc'] = '2001'; //akun code for hutang
-                                $datadtl[0]['cdfigroup'] = '2000';
+                                $datadtl[0]['cdacc'] = '21001'; //akun code for hutang
                                 $datadtl[0]['debit'] = $totcost;
                                 $datadtl[0]['kredit'] = '0';
 
-                                $datadtl[1]['cdacc'] = '1005'; //akun code for persediaan
-                                $datadtl[1]['cdfigroup'] = '1000';
+                                $datadtl[1]['cdacc'] = '11003'; //akun code for persediaan
                                 $datadtl[1]['debit'] = '0';
                                 $datadtl[1]['kredit'] = $totcost;
-
+                                
                                 $bill = FiComp::createGL($datahdr, $datadtl);
+
                                 if ($bill['type'] == 'E')
                                     return $bill;
                             } catch (Exception $e) {
