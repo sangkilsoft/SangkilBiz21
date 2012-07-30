@@ -53,6 +53,8 @@ class PurcController extends Controller {
 
     public function actionBayar() {
         $model = new FicoBayar;
+        $po = (isset($_GET['po'])) ? $_GET['po'] : null;
+        $model = $model->model()->find('purch_num=:po', array(':po' => $po));
         $this->render('bayar', array('model' => $model));
     }
 
@@ -129,7 +131,7 @@ class PurcController extends Controller {
                 echo CJSON::encode($bill);
                 return;
             }
-            
+
             //bayar hutang per PO
             $data['cdfigl'] = $bill['val'];
             $bayar = FiComp::bayarHutang($data);
