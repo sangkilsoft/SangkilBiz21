@@ -445,7 +445,7 @@ class InvController extends Controller {
 
     public function actionFindVendor() {
         $cdvend = $_POST['cdvend'];
-        $data = Mdvendor::model()->findAll('cdvendcat=:cdvendcat AND cdvend=:cdvend', array(':cdvendcat' => '10', ':cdvend' => $cdvend));
+        $data = Mdvendor::model()->findAll('cdvend=:cdvend', array(':cdvend' => $cdvend));
         $data = CHtml::listData($data, 'cdvend', 'dscrp');
         foreach ($data as $value => $name) {
             echo CHtml::tag('option', array('value' => $value, 'selected' => true), CHtml::encode($name), true);
@@ -453,8 +453,7 @@ class InvController extends Controller {
     }
 
     public function actionFindStatus() {
-        $status = $_POST['status'];
-
+        $status = $_POST['status'];    
         $data = Vlookup::model()->findAll('groupv=:groupv AND convert_to_integer(cdlookup) >= :cdlookup ', array(':groupv' => 'purch_status', ':cdlookup' => $status));
         $data = CHtml::listData($data, 'cdlookup', 'dscrp');
 
@@ -680,8 +679,8 @@ class InvController extends Controller {
             if ($po['type'] == 'E')
                 $trns->rollback();
             else
-                $trns->commit();
-            print_r(json_encode($po));
+                $trns->commit();            
+            print_r(CJSON::encode($po));
         } catch (ErrorException $e) {
             $trns->rollback();
             print_r($e->getMessage());
