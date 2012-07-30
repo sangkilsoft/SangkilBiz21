@@ -115,7 +115,7 @@ class FicoController extends Controller {
             Yii::app()->user->mmenu = "fico";
 
         $this->_idacc = isset($_POST['id']) ? intval($_POST['id']) : '1';
-        
+
         $model = new FicoNcoa;
         $criteria = new CDbCriteria;
         $criteria->condition = 'parent_id_coa =:id';
@@ -396,6 +396,7 @@ class FicoController extends Controller {
 
     public function actionPeriode() {
         $model = new FicoPeriode;
+        $model->tahun = date('Y');
         $this->render('periode', array('model' => $model));
     }
 
@@ -499,6 +500,7 @@ class FicoController extends Controller {
 
         if (isset($_POST['FicoGl'])) {
             $model->attributes = $_POST['FicoGl'];
+
             if ($model->validate()) {
                 // form inputs are valid, do something here
                 return;
@@ -512,7 +514,34 @@ class FicoController extends Controller {
             Yii::app()->user->mmenu = "fico";
 
         $model = new FicoGl;
-        $this->render('rptbesar', array('model' => $model));
+
+        $modelacc = new FicoNcoa;
+        $criteria = new CDbCriteria;
+        $criteria->condition = 'parent_id_coa <> 0 ';
+        $criteria2->order = 'cdfiacc ASC';
+
+        $modelacc = $modelacc->with('childsCount')->findAll($criteria);
+        $hschild = '';
+        $is_top = true;
+        foreach ($modelacc as $mdl) {
+            if ($mdl->childsCount > 0) {
+                if (!$is_top)
+                    $hschild .= ',';
+                $hschild .= $mdl->id_coa;
+                $is_top = false;
+            }
+        }
+
+        $modelacc2 = new FicoNcoa;
+        $criteria2 = new CDbCriteria;
+        $criteria2->condition = "parent_id_coa <> 0 AND id_coa NOT IN ($hschild)";
+        //$criteria2->params = array(':haschild' => $hschild);
+        $criteria2->order = 'cdfiacc ASC';
+
+        $modelacc2 = $modelacc2->findAll($criteria2);
+
+        $datalist = CHtml::listData($modelacc2, 'id_coa', 'dscrp', 'getparent.dscrp');
+        $this->render('rptbesar', array('model' => $model, 'coadatalist' => $datalist));
     }
 
     public function actionAccTree() {
@@ -549,28 +578,66 @@ class FicoController extends Controller {
     }
 
     public function actionVendorPO() {
-        if (!Yii::app()->user->isGuest)
-            Yii::app()->user->mmenu = "fico";
-
-        $id = isset($_POST['id']) ? intval($_POST['id']) : '0';
+        $this->_idhutang = isset($_POST['id']) ? $_POST['id'] : '0';
 
         $model = new Vhutang;
         $criteria = new CDbCriteria;
-        $criteria->condition = 'parentid=:id';
+        $criteria->condition = 'trim(parentid) = trim(:id)';
         $criteria->order = 'id ASC';
-        $criteria->params = array(':id' => $id);
+        $criteria->params = array(':id' => $this->_idhutang);
 
         $result = array();
-        $vndor = $model->findAll($criteria);
-        foreach ($vndor as $rows) {
+        $model = $model->findAll($criteria);
+        foreach ($model as $rows) {
             $node = array();
             $node['id'] = $rows['id'];
             $node['text'] = $rows['txt'];
-            $node['state'] = $this->has_child($rows['id']) ? 'closed' : 'open';
-            $node['lain'] = "test data tambahan";
+            $node['state'] = $this->has_dtlhutang($rows['id']) ? 'closed' : 'open';
             array_push($result, $node);
         }
+
         echo CJSON::encode($result);
+    }
+
+    private $_idhutang = null;
+
+    public function actionHutangTree() {
+        $this->_idhutang = isset($_POST['id']) ? $_POST['id'] : '0';
+
+        $model = new Vhutang;
+        $criteria = new CDbCriteria;
+        $criteria->condition = 'trim(parentid) = trim(:id)';
+        $criteria->order = 'id ASC';
+        $criteria->params = array(':id' => $this->_idhutang);
+
+        $result = array();
+        $model = $model->findAll($criteria);
+        foreach ($model as $rows) {
+            $node = array();
+            $node['id'] = $rows['id'];
+            $node['txt'] = $rows['txt'];
+            $node['text'] = $rows['txt'] . '(' . number_format($rows['sisa']) . ')';
+            $node['total_hutang'] = number_format($rows['total_hutang']);
+            $node['total_bayar'] = number_format($rows['total_bayar']);
+            $node['sisa'] = number_format($rows['sisa']);
+            $node['status'] = $rows['status'];
+            $node['date_post'] = $rows['date_post'];
+
+            $node['state'] = $this->has_dtlhutang($rows['id']) ? 'closed' : 'open';
+
+            array_push($result, $node);
+        }
+
+        echo CJSON::encode($result);
+    }
+
+    protected function has_dtlhutang($id) {
+        $mdl = new Vhutang;
+        $crta = new CDbCriteria;
+        $crta->condition = 'parentid=:pid';
+        $crta->params = array(':pid' => $id);
+
+        return $mdl->exists($crta);
     }
 
     protected function has_child($id) {
@@ -605,9 +672,9 @@ class FicoController extends Controller {
     }
 
     public function actionAllHutang() {
-        $cdvend = strtoupper(trim($_POST['cdvend']));
+        $cdvend = isset($_POST['cdvend']) ? strtoupper(trim($_POST['cdvend'])) : 'S01';
 
-        $model = new FicoHutang;
+        
         $criteria = new CDbCriteria;
         $criteria->condition = 'total_hutang > total_bayar ';
         $criteria->compare('cdvend', $cdvend, false);
@@ -678,6 +745,10 @@ class FicoController extends Controller {
 
     public function actionFindGL() {
         $data_src = $_POST['FicoGl'];
+//        $data_src['cdunit'] = '1100';
+//        $data_src['gl_date'] = '01-07-2012';
+//        $data_src['gl_date2'] = '10-07-2012';
+
         $model = new FicoGl;
         $criteria = new CDbCriteria;
         //$criteria->select = 'cdfigl';
@@ -705,6 +776,7 @@ class FicoController extends Controller {
 
                 $dtl[$i]['create_by'] = '';
                 $dtl[$i]['create_date'] = '';
+
                 $ndate = split('-', $row->getAttribute('gl_date'));
                 $dtl[$i]['gl_date'] = $ndate[2] . '-' . $ndate[1] . '-' . $ndate[0];
                 $dtl[$i]['dscrp'] = strtoupper($row->getAttribute('dscrp'));
@@ -728,13 +800,14 @@ class FicoController extends Controller {
                         $dtl[$i]['debit'] = number_format($rows['debit'], 0, '.', ',');
 
                     if ($rows['kredit'] == 0) {
-                        $dtl[$i]['cdfigl'] = $rows['cdfiacc'];
-                        $dtl[$i]['cdfiacc'] = $rows['cdfiacc'];
+                        $dtl[$i]['cdfigl'] = $rows->coa->cdfiacc . '&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;';
+                        $dtl[$i]['cdfiacc'] = $rows->coa->cdfiacc . '&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;';
                         $dtl[$i]['dscrp'] = $rows->coa->dscrp;
                         $dtl[$i]['kredit'] = '-';
                     } else {
-                        $dtl[$i]['cdfigl'] = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . $rows['cdfiacc'];
-                        $dtl[$i]['cdfiacc'] = '&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;;' . $rows['cdfiacc'];
+                        $dtl[$i]['cdfigl'] = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . $rows->coa->cdfiacc;
+                        ;
+                        $dtl[$i]['cdfiacc'] = $rows->coa->cdfiacc; //$rows['cdfiacc'];
                         $dtl[$i]['dscrp'] = '&nbsp;&nbsp;&nbsp;&nbsp;' . $rows->coa->dscrp;
                         $dtl[$i]['kredit'] = number_format($rows['kredit'], 0, '.', ',');
                     }
@@ -944,9 +1017,6 @@ class FicoController extends Controller {
             return;
         }
 
-//        echo CJSON::encode($data_src);
-//        return;
-
         $criteria = new CDbCriteria;
         $criteria->condition = 'id_periode =:id_periode ';
         if ($data_src['cdunit'] !== "") {
@@ -983,31 +1053,32 @@ class FicoController extends Controller {
                 $model2 = new FicoGldtl;
                 $criteria2 = new CDbCriteria;
                 if ($data_src['acc_id'] !== "") {
-                    $criteria2->condition = 'cdfigl =:cdfigl AND cdfiacc=:cdfiacc';
-                    $criteria2->params = array(':cdfigl' => $row->getAttribute('cdfigl'), ':cdfiacc' => $data_src['acc_id']);
+                    $criteria2->condition = 'cdfigl =:cdfigl AND id_coa=:id_coa';
+                    $criteria2->params = array(':cdfigl' => $row->getAttribute('cdfigl'), ':id_coa' => $data_src['acc_id']);
                 } else {
                     $criteria2->condition = 'cdfigl =:cdfigl';
                     $criteria2->params = array(':cdfigl' => $row->getAttribute('cdfigl'));
                 }
 
-                $criteria2->order = 'cdfigroup ASC, cdfigl ASC, debit DESC, kredit DESC';
+                $criteria2->order = 'cdfigl ASC, debit DESC, kredit DESC';
 
                 $dtlpro = new CActiveDataProvider($model2, array(
                             'criteria' => $criteria2));
+
                 foreach ($dtlpro->getData() as $rows) {
                     $saldo += $rows['debit'] - $rows['kredit'];
                     $ndate = split('-', $row->getAttribute('gl_date'));
                     $dtl[$i]['gl_date'] = $ndate[2] . '-' . $ndate[1] . '-' . $ndate[0];
                     if ($rows['kredit'] == 0) {
                         $dtl[$i]['cdfigl'] = $row->getAttribute('cdfigl');
-                        $dtl[$i]['cdfiacc'] = $rows['cdfiacc'];
+                        $dtl[$i]['cdfiacc'] = $rows->coa->cdfiacc;
                         $dtl[$i]['dscrp'] = $row->getAttribute('dscrp'); //$rows->coa->dscrp;$dtl[$i]['debit'] = number_format($rows['debit'], 0, '.', ',');
                         $dtl[$i]['debit'] = number_format($rows['debit'], 0, '.', ',');
                         $dtl[$i]['kredit'] = '-';
                         //$saldo += $rows['debit'];
                     } else {
                         $dtl[$i]['cdfigl'] = $row->getAttribute('cdfigl');
-                        $dtl[$i]['cdfiacc'] = $rows['cdfiacc'];
+                        $dtl[$i]['cdfiacc'] = $rows->coa->cdfiacc;
                         $dtl[$i]['dscrp'] = $row->getAttribute('dscrp'); //$rows->coa->dscrp;
                         $dtl[$i]['debit'] = '-';
                         $dtl[$i]['kredit'] = number_format($rows['kredit'], 0, '.', ',');
