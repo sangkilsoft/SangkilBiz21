@@ -1,7 +1,7 @@
 <?php
 
 class FicoController extends Controller {
-//tes
+    //updating test by mujib
     public $layout = '//layouts/column2';
 
     /**
