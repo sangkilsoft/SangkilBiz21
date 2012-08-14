@@ -3,6 +3,7 @@
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
+ * belum upload github
  */
 
 class InvComp extends CComponent {
@@ -21,7 +22,7 @@ class InvComp extends CComponent {
 
         try {
             $hdrmodel = new InvgiHdr;
-            $hdrmodel->gi_num = SysComp::getNumberDoc('GI01', '10', $hdr['cdunit']);
+            $hdrmodel->gi_num = SysComp::getNumberDoc('GI01', '9', $hdr['cdunit']);
             $hdrmodel->cdunit = $hdr['cdunit'];
             $hdrmodel->cdwhse = $hdr['cdwhse'];
             $hdrmodel->dscrp = $hdr['dscrp'];
@@ -351,11 +352,9 @@ class InvComp extends CComponent {
                 $dtlmodel->uomprice = (float) str_replace(',', '', $rows['sprise']);
                 $totcost += ($dtlmodel->uomcost * $dtlmodel->qtypurch);
 
+                if (!$dtlmodel->save())
+                    return array('type' => 'E', 'message' => $dtlmodel->getErrors());
 
-                if (!$dtlmodel->save()) {
-                    $retval = array('type' => 'E', 'message' => $dtlmodel->getErrors());
-                    return $retval;
-                }
                 $i++;
             }
 
@@ -376,32 +375,32 @@ class InvComp extends CComponent {
 
                 //status posted
                 if ($hdrmodel->status >= 2) {
-                    $hdr['dscrp'] = "Pembelian Barang";
-                    $hdr['gl_date'] = date('d-m-Y');
-                    $hdr['refnum'] = $hdrmodel->purch_num;
+                    try {
+                        //entri jurnal ---------------------------------
+                        $datahdr['dscrp'] = "Pembalian Barang";
+                        $datahdr['gl_date'] = date('d-m-Y');
+                        $datahdr['refnum'] = $hdrmodel->purch_num;
 
-                    $dtl[0]['cdacc'] = '1005'; //akun code for persediaan
-                    $dtl[0]['cdfigroup'] = '1000';
-                    $dtl[0]['debit'] = $totcost;
-                    $dtl[0]['kredit'] = '0';
+                        $datadtl[0]['cdacc'] = '21001'; //akun code for hutang
+                        $datadtl[0]['debit'] = $totcost;
+                        $datadtl[0]['kredit'] = '0';
 
-                    $dtl[1]['cdacc'] = '2001'; //akun code for hutang
-                    $dtl[1]['cdfigroup'] = '2000';
-                    $dtl[1]['debit'] = '0';
-                    $dtl[1]['kredit'] = $totcost;
+                        $datadtl[1]['cdacc'] = '11003'; //akun code for persediaan
+                        $datadtl[1]['debit'] = '0';
+                        $datadtl[1]['kredit'] = $totcost;
 
-                    $bill = FiComp::createGL($hdr, $dtl);
-                    if ($bill !== false) {
+                        $bill = FiComp::createGL($datahdr, $datadtl);
                         if ($bill['type'] == 'E')
                             return $bill;
-                    }else {
-                        $retval = array('type' => 'E', 'message' => 'Billing Failed');
-                        return $retval;
+
+                        //catatan hutang vendor
+                    } catch (Exception $e) {
+                        return array('type' => 'E', 'message' => $bill);
                     }
 
                     //for catatan hutang
                     try {
-                        $dthutang = array('purch_num' => $hdrmodel->purch_num, 'cdvend' => $hdrmodel->cdvend, 'total_hutang' => $totcost, 'status' => 0);
+                        $dthutang = array('purch_num' => $hdr->purch_num, 'cdvend' => $hdr->cdvend, 'total_hutang' => $totcost, 'status' => 0);
                         $hutang = FiComp::createHutang($dthutang);
                         if ($hutang['type'] == 'E')
                             return $hutang;
@@ -561,10 +560,10 @@ class InvComp extends CComponent {
                             try {
                                 $datahdr['refnum'] = $datahdr['purch_num'];
                                 $datahdr['date_gr'] = date('d-m-Y');
-                                $datahdr['dscrp'] = 'by po update';                                
-                                
-                                $gr = InvComp::createGR($datahdr, $datadtl);                                
-                                
+                                $datahdr['dscrp'] = 'by po update';
+
+                                $gr = InvComp::createGR($datahdr, $datadtl);
+
                                 if ($gr['type'] == 'E')
                                     return $gr;
                             } catch (Exception $e) {
@@ -577,58 +576,59 @@ class InvComp extends CComponent {
 
                             return array('type' => 'S', 'message' => $msg);
                             break;
-                        case 2://From Draft to Posted
-                            try {
-                                $datahdr['refnum'] = $datahdr['purch_num'];
-                                $datahdr['date_gr'] = date('d-m-Y');
-                                $datahdr['dscrp'] = 'by po update';
-                                $gr = InvComp::createGR($datahdr, $datadtl);
-                                if ($gr['type'] == 'E')
-                                    return $gr;
-                            } catch (Exception $e) {
-                                return array('type' => 'E', 'message' => $e->getMessage());
-                            }
+                        case 2://<editor-fold defaultstate="collapsed" desc="From Draft to Posted">
+                            /*
+                              try {
+                              $datahdr['refnum'] = $datahdr['purch_num'];
+                              $datahdr['date_gr'] = date('d-m-Y');
+                              $datahdr['dscrp'] = 'by po update';
+                              $gr = InvComp::createGR($datahdr, $datadtl);
+                              if ($gr['type'] == 'E')
+                              return $gr;
+                              } catch (Exception $e) {
+                              return array('type' => 'E', 'message' => $e->getMessage());
+                              }
 
-                            try {
-                                //entri jurnal ---------------------------------
-                                $datahdr['dscrp'] = "Create by purcashing";
-                                $datahdr['tglgl'] = date('d-m-Y');
-                                $datahdr['refnum'] = $datahdr['purch_num'];
+                              try {
+                              //entri jurnal ---------------------------------
+                              $datahdr['dscrp'] = "Pembalian Barang";
+                              $datahdr['gl_date'] = date('d-m-Y');
+                              $datahdr['refnum'] = $datahdr['purch_num'];
 
-                                $dtl[0]['cdacc'] = '1005'; //akun code for persediaan
-                                $dtl[0]['cdfigroup'] = '1000';
-                                $dtl[0]['debit'] = $totcost;
-                                $dtl[0]['kredit'] = '0';
+                              $datadtl[0]['cdacc'] = '21001'; //akun code for hutang
+                              $datadtl[0]['debit'] = $totcost;
+                              $datadtl[0]['kredit'] = '0';
 
-                                $dtl[1]['cdacc'] = '2001'; //akun code for hutang
-                                $dtl[1]['cdfigroup'] = '2000';
-                                $dtl[1]['debit'] = '0';
-                                $dtl[1]['kredit'] = $totcost;
+                              $datadtl[1]['cdacc'] = '11003'; //akun code for persediaan
+                              $datadtl[1]['debit'] = '0';
+                              $datadtl[1]['kredit'] = $totcost;
 
-                                $bill = FiComp::createGL($datahdr, $datadtl);
-                                if ($bill['type'] == 'E')
-                                    return $bill;
+                              $bill = FiComp::createGL($datahdr, $datadtl);
+                              if ($bill['type'] == 'E')
+                              return $bill;
 
-                                //catatan hutang vendor
-                            } catch (Exception $e) {
-                                return array('type' => 'E', 'message' => $e->getMessage());
-                            }
+                              //catatan hutang vendor
+                              } catch (Exception $e) {
+                              return array('type' => 'E', 'message' => $e->getMessage());
+                              }
 
-                            //for catatan hutang
-                            try {
-                                $dthutang = array('purch_num' => $hdr->purch_num, 'cdvend' => $hdr->cdvend, 'total_hutang' => $totcost, 'status' => 0);
-                                $hutang = FiComp::createHutang($dthutang);
-                                if ($hutang['type'] == 'E')
-                                    return $hutang;
-                            } catch (ErrorException $e) {
-                                return array('type' => 'E', 'message' => 'Hutang Failed');
-                            }
+                              //for catatan hutang
+                              try {
+                              $dthutang = array('purch_num' => $hdr->purch_num, 'cdvend' => $hdr->cdvend, 'total_hutang' => $totcost, 'status' => 0);
+                              $hutang = FiComp::createHutang($dthutang);
+                              if ($hutang['type'] == 'E')
+                              return $hutang;
+                              } catch (ErrorException $e) {
+                              return array('type' => 'E', 'message' => 'Hutang Failed');
+                              }
 
-                            $msg = 'Success updating ' . $datahdr['purch_num'];
-                            return array('type' => 'S', 'message' => $msg);
-                            break;
+                              $msg = 'Success updating ' . $datahdr['purch_num'];
+                              return array('type' => 'S', 'message' => $msg);
+                             */
+                            return array('type' => 'E', 'message' => 'Save as draft first..!');
+                            break; // </editor-fold>  
                         case -1 ://From Draft to Canceled
-                            return array('type' => 'S', 'message' => 'Cancel purchasing document ' . $datahdr['purch_num']);
+                            return array('type' => 'S', 'message' => 'Cancel Pembalian Barang ' . $datahdr['purch_num']);
                             break;
                     }
                     break; // </editor-fold>                
@@ -662,7 +662,7 @@ class InvComp extends CComponent {
                             return array('type' => 'S', 'message' => $msg);
                             break;
                         case 2:
-                            try {                          
+                            try {
                                 if (count($rsgr) > 0) {
                                     $datahdr['refnum'] = $datahdr['purch_num'];
                                     $datahdr['date_gr'] = date('d-m-Y');
@@ -684,7 +684,7 @@ class InvComp extends CComponent {
                             }
 
                             try {
-                                $datahdr['dscrp'] = "Create by purcashing";
+                                $datahdr['dscrp'] = "Pembalian Barang";
                                 $datahdr['gl_date'] = date('d-m-Y');
                                 $datahdr['refnum'] = $datahdr['purch_num'];
 
@@ -695,7 +695,7 @@ class InvComp extends CComponent {
                                 $datadtl[1]['cdacc'] = '11003'; //akun code for persediaan
                                 $datadtl[1]['debit'] = '0';
                                 $datadtl[1]['kredit'] = $totcost;
-                                
+
                                 $bill = FiComp::createGL($datahdr, $datadtl);
 
                                 if ($bill['type'] == 'E')
@@ -772,19 +772,17 @@ class InvComp extends CComponent {
                                     return $gi;
                             }
 
-                            //for cancel journal
+                            //for cancel journal                                
                             try {
                                 $datahdr['dscrp'] = "Cancel purcashing";
                                 $datahdr['gl_date'] = date('d-m-Y');
                                 $datahdr['refnum'] = $datahdr['purch_num'];
 
-                                $datadtl[0]['cdacc'] = '2001'; //akun code for hutang
-                                $datadtl[0]['cdfigroup'] = '2000';
+                                $datadtl[0]['cdacc'] = '11003'; //akun code for persediaan
                                 $datadtl[0]['debit'] = $totcost;
                                 $datadtl[0]['kredit'] = '0';
 
-                                $datadtl[1]['cdacc'] = '1005'; //akun code for persediaan
-                                $datadtl[1]['cdfigroup'] = '1000';
+                                $datadtl[1]['cdacc'] = '21001'; //akun code for hutang
                                 $datadtl[1]['debit'] = '0';
                                 $datadtl[1]['kredit'] = $totcost;
 

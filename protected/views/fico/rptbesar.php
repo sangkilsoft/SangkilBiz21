@@ -104,9 +104,7 @@ $this->widget('MenuBar');
                 </td>
                 <td style="border-bottom: none;">
                     <?php
-                    $modelacc = FicoCoa::model()->with('group')->findAll(array('order' => 'cdfiacc ASC'));
-                    $datalist = CHtml::listData($modelacc, 'cdfiacc', 'dscrp', 'group.dscrp');
-                    echo CHtml::dropDownList('FicoGl[acc_id]', '', $datalist, array('id' => 'coa',
+                    echo CHtml::dropDownList('FicoGl[acc_id]', '', $coadatalist, array('id' => 'coa',
                         'prompt' => '--Pilih Account--',));
                     ?>
                 </td>
@@ -115,7 +113,7 @@ $this->widget('MenuBar');
                 <td style="border-bottom: none; "><?php echo $form->labelEx($model, 'gl_date'); ?></td>
                 <td style="border-bottom: none;">
                     <?php
-                    $modelacc = FicoPeriode::model()->findAll('is_active=:active', array(':active' => '1'));
+                    $modelacc = FicoPeriode::model()->findAll('is_active>=:active', array(':active' => '0'));
                     $datalist = CHtml::listData($modelacc, 'id_periode', 'nmperiode', 'tahun');
                     echo CHtml::dropDownList('FicoGl[periode_id]', '', $datalist, array('id' => 'peride'));
 

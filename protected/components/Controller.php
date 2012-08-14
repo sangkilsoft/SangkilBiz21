@@ -16,6 +16,16 @@ class Controller extends CController {
      * @var array context menu items. This property will be assigned to {@link CMenu::items}.
      */
     public $menu = array();
+    public $mmenu = array(
+        'items' => array(
+            array('label' => 'Home', 'url' => array('/site/index'), 'itemOptions' => array('class' => 'test')),
+            array('label' => 'About', 'url' => array('/site/page', 'view' => 'about'), 'itemOptions' => array('class' => 'icon_chart')),
+            array('label' => 'Login', 'url' => array('/site/login')),
+        /*
+         * array('label' => 'Logout (' . Yii::app()->user->name . ')', 'url' => array('/site/logout'), 'visible' => !Yii::app()->user->isGuest),
+         */
+        ),
+    );
 
     /**
      * @var array the breadcrumbs of the current page. The value of this property will
@@ -24,4 +34,5 @@ class Controller extends CController {
      */
     public $breadcrumbs = array();
     public $oprs = array();
+
 }

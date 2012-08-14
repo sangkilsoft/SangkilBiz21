@@ -7,6 +7,11 @@
  * @property string $id
  * @property string $txt
  * @property string $parentid
+ * @property double $total_hutang
+ * @property double $total_bayar
+ * @property double $sisa
+ * @property integer $status
+ * @property string $date_post
  */
 class Vhutang extends CActiveRecord
 {
@@ -35,11 +40,13 @@ class Vhutang extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
+			array('status', 'numerical', 'integerOnly'=>true),
+			array('total_hutang, total_bayar, sisa', 'numerical'),
 			array('id', 'length', 'max'=>13),
-			array('txt, parentid', 'safe'),
+			array('txt, parentid, date_post', 'safe'),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
-			array('id, txt, parentid', 'safe', 'on'=>'search'),
+			array('id, txt, parentid, total_hutang, total_bayar, sisa, status, date_post', 'safe', 'on'=>'search'),
 		);
 	}
 
@@ -63,6 +70,11 @@ class Vhutang extends CActiveRecord
 			'id' => 'ID',
 			'txt' => 'Txt',
 			'parentid' => 'Parentid',
+			'total_hutang' => 'Total Hutang',
+			'total_bayar' => 'Total Bayar',
+			'sisa' => 'Sisa',
+			'status' => 'Status',
+			'date_post' => 'Date Post',
 		);
 	}
 
@@ -80,8 +92,13 @@ class Vhutang extends CActiveRecord
 		$criteria->compare('id',$this->id,true);
 		$criteria->compare('txt',$this->txt,true);
 		$criteria->compare('parentid',$this->parentid,true);
+		$criteria->compare('total_hutang',$this->total_hutang);
+		$criteria->compare('total_bayar',$this->total_bayar);
+		$criteria->compare('sisa',$this->sisa);
+		$criteria->compare('status',$this->status);
+		$criteria->compare('date_post',$this->date_post,true);
 
-		return new CActiveDataProvider(get_class($this), array(
+		return new CActiveDataProvider($this, array(
 			'criteria'=>$criteria,
 		));
 	}

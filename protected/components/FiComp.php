@@ -3,6 +3,7 @@
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
+ * belum upload github
  */
 
 class FiComp extends CComponent {
@@ -42,7 +43,7 @@ class FiComp extends CComponent {
 
         try {
             $hdrmodel = new FicoGl;
-            $hdrmodel->cdfigl = SysComp::getNumberDoc('GL01', '8', $hdr['cdunit']);
+            $hdrmodel->cdfigl = SysComp::getNumberDoc('GL01', '7', $hdr['cdunit']);    
             $hdrmodel->cdunit = $hdr['cdunit'];
             $hdrmodel->dscrp = $hdr['dscrp'];
 
@@ -78,7 +79,7 @@ class FiComp extends CComponent {
                     return $retval;
                 }
             }
-
+            
             $retval = array('type' => 'S', 'message' => 'GL Created :' . $dtlmodel->cdfigl, 'val' => $dtlmodel->cdfigl);
             return $retval;
         } catch (ErrorException $e) {

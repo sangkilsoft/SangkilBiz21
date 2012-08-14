@@ -28,9 +28,9 @@ class MjbTree extends MdmEuiWidget {
         $this->htmlOptions['class'] = 'easyui-tree';
 
         if (isset($this->dataUrl))
-            $this->htmlOptions['url'] = CHtml::normalizeUrl('/sangkilbiz2/index.php?r='.$this->dataUrl);
+            $this->htmlOptions['url'] = CHtml::normalizeUrl(Yii::app()->baseUrl.'/index.php?r='.$this->dataUrl);
         if (isset($this->saveUrl))
-            $this->htmlOptions['saveUrl'] = CHtml::normalizeUrl('/sangkilbiz2/index.php?r='.$this->saveUrl);
+            $this->htmlOptions['saveUrl'] = CHtml::normalizeUrl(Yii::app()->baseUrl.'/index.php?r='.$this->saveUrl);
         
         echo CHtml::tag('ul', $this->htmlOptions, '');
         $this->options['animate'] = true;

@@ -31,6 +31,20 @@ $loaditem = CHtml::ajax(array(
         ));
 
 Yii::app()->clientScript->registerScript('form', "
+var bisa = $('#saveBtn').linkbutton('options');
+if(bisa.disabled) $('#saveBtn').linkbutton('enable');
+$('#Mditem_cditem').removeAttr('readonly');
+$('#Mditem_cditem').focus();
+$('#Mditem_cditem').val('');
+$('#Mditem_cduom').val('');
+$('#Mditem_cdgroup').val('');
+$('#Mditem_cdicat').val('');
+$('#Mditem_dscrp').val('');
+$('#Mditem_dscrp').removeAttr('readonly');
+
+$('#delBtn').linkbutton('disable'); 
+$('#trns').html('New..!');
+        
 $('#newBtn').click(function(){
     var bisa = $('#saveBtn').linkbutton('options');
     if(bisa.disabled) $('#saveBtn').linkbutton('enable');
@@ -118,14 +132,14 @@ function sukses(r,sender){
         alert(r);
         return true;
     } 
-    //alert('Successfully '+sender+' record..!');
-    if(sender == 'delete') 
-        $('#cancelBtn').click();
-    else
-        $('#newBtn').click();
+//    if(sender == 'delete') 
+//        $('#cancelBtn').click();
+//    else
+        
+    $('#newBtn').click();
         
     $('#dg').mdmegrid('load');
-    $('#trns').html('');
+    //$('#trns').html('');
 }
 
 function failed(r,sender){
@@ -181,13 +195,15 @@ $this->widget('MenuBar');
             </tr>
             <tr>
                 <td><?php echo $form->labelEx($model, 'lnitem'); ?></td>
-                <td><?php echo $form->textField($model, 'lnitem', array('size' => 4, 'maxlength' => 32)); ?></td>
+                <td><?php echo $form->textField($model, 'lnitem', array('size' => 4, 'maxlength' => 32, 'readonly' => true)); ?></td>
                 <td><?php echo $form->labelEx($model, 'cdgroup'); ?></td>
-                <td><?php
+                <td>
+                    <?php
                     //echo $form->textField($model, 'cdgroup', array('size' => 4, 'maxlength' => 32)); 
                     $listnyo = CHtml::listData(MditemGroup::model()->FindAll(), 'cdgroup', 'dscrp');
                     echo CHtml::activeDropDownList($model, 'cdgroup', $listnyo);
-                    ?></td>
+                    ?>
+                </td>
             </tr>
             <tr>
                 <td style="border-bottom:0px; height: 40px;"><?php echo $form->labelEx($model, 'dscrp'); ?></td>

@@ -3,15 +3,16 @@
 	position:absolute;
 	overflow:hidden;
 	background:transparent url('images/panel_title.png');
-	background1:#878787;
 	padding:5px;
 	border:1px solid #99BBE8;
+	border-radius:5px;
 	-moz-border-radius:5px;
 	-webkit-border-radius: 5px;
 }
 .window-shadow{
 	position:absolute;
 	background:#ddd;
+	border-radius:5px;
 	-moz-border-radius:5px;
 	-webkit-border-radius: 5px;
 	-moz-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.2);
@@ -26,6 +27,9 @@
 	background:#fff;
 	border:1px solid #99BBE8;
 	border-top-width:0px;
+}
+.window .window-body-noheader{
+	border-top-width:1px;
 }
 .window .window-header .panel-icon{
 	left:1px;
@@ -58,7 +62,6 @@
 	filter:alpha(opacity=40);
 	opacity:0.40;
 	background:#ccc;
-	display1:none;
 	font-size:1px;
 	*zoom:1;
 	overflow:hidden;

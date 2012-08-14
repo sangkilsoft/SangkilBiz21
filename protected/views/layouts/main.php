@@ -24,7 +24,7 @@
             <div id="logo-desc">Empowering your system</div>            
         </div><!-- header -->
         <div id="topmenu">
-            <div class="container" id="mainmenu" >
+            <div class="container" id="mainmenu" >                  
                 <?php
 //                $this->widget('MenuBar');
                 $this->widget('zii.widgets.CMenu', array(

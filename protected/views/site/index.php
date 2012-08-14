@@ -13,3 +13,15 @@ $this->pageTitle=Yii::app()->name. ' - '.$judul; ?>
 the <a href="http://www.yiiframework.com/doc/">documentation</a>.
 Feel free to ask in the <a href="http://www.yiiframework.com/forum/">forum</a>,
 should you have any questions.</p>
+
+<?php
+
+$dd1 = date("d-m-Y", mktime(0, 0, 0, 02, 10, 2012));
+$dd2 = date("d-m-Y", mktime(0, 0, 0, 02, 25, 2012));
+
+echo dateDiff($dd1, $dd2);
+
+function dateDiff ($d1, $d2) {
+  return round(abs(strtotime($d1)-strtotime($d2))/86400);
+} 
+?>

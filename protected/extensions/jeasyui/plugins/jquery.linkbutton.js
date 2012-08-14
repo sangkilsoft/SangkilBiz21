@@ -1,10 +1,10 @@
 ﻿/**
- * jQuery EasyUI 1.2.3
+ * jQuery EasyUI 1.2.6
  * 
  * Licensed under the GPL terms
  * To use it on other terms please contact us
  *
- * Copyright(c) 2009-2011 stworthy [ stworthy@gmail.com ] 
+ * Copyright(c) 2009-2012 stworthy [ stworthy@gmail.com ] 
  * 
  */
 (function($){
@@ -33,6 +33,13 @@ if(_3.iconCls){
 $(_2).find(".l-btn-empty").addClass(_3.iconCls);
 }
 }
+$(_2).unbind(".linkbutton").bind("focus.linkbutton",function(){
+if(!_3.disabled){
+$(this).find("span.l-btn-text").addClass("l-btn-focus");
+}
+}).bind("blur.linkbutton",function(){
+$(this).find("span.l-btn-text").removeClass("l-btn-focus");
+});
 _4(_2,_3.disabled);
 };
 function _4(_5,_6){
@@ -44,10 +51,9 @@ if(_8){
 _7.href=_8;
 $(_5).attr("href","javascript:void(0)");
 }
-var _9=$(_5).attr("onclick");
-if(_9){
-_7.onclick=_9;
-$(_5).attr("onclick","");
+if(_5.onclick){
+_7.onclick=_5.onclick;
+_5.onclick=null;
 }
 $(_5).addClass("l-btn-disabled");
 }else{
@@ -61,17 +67,17 @@ _5.onclick=_7.onclick;
 $(_5).removeClass("l-btn-disabled");
 }
 };
-$.fn.linkbutton=function(_a,_b){
-if(typeof _a=="string"){
-return $.fn.linkbutton.methods[_a](this,_b);
+$.fn.linkbutton=function(_9,_a){
+if(typeof _9=="string"){
+return $.fn.linkbutton.methods[_9](this,_a);
 }
-_a=_a||{};
+_9=_9||{};
 return this.each(function(){
-var _c=$.data(this,"linkbutton");
-if(_c){
-$.extend(_c.options,_a);
+var _b=$.data(this,"linkbutton");
+if(_b){
+$.extend(_b.options,_9);
 }else{
-$.data(this,"linkbutton",{options:$.extend({},$.fn.linkbutton.defaults,$.fn.linkbutton.parseOptions(this),_a)});
+$.data(this,"linkbutton",{options:$.extend({},$.fn.linkbutton.defaults,$.fn.linkbutton.parseOptions(this),_9)});
 $(this).removeAttr("disabled");
 }
 _1(this);
@@ -88,8 +94,8 @@ return jq.each(function(){
 _4(this,true);
 });
 }};
-$.fn.linkbutton.parseOptions=function(_d){
-var t=$(_d);
+$.fn.linkbutton.parseOptions=function(_c){
+var t=$(_c);
 return {id:t.attr("id"),disabled:(t.attr("disabled")?true:undefined),plain:(t.attr("plain")?t.attr("plain")=="true":undefined),text:$.trim(t.html()),iconCls:(t.attr("icon")||t.attr("iconCls"))};
 };
 $.fn.linkbutton.defaults={id:null,disabled:false,plain:false,text:"",iconCls:null};

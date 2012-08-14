@@ -28,6 +28,8 @@ $('#srcBtn').click(function(){
 });  
         
 function sukses(r,sender){
+    //alert(r);
+        
     var ret = JSON.parse(r);        
     if(ret.type == 'S'){           
         $('#dg').mdmegrid('loadData',ret); 
@@ -78,81 +80,90 @@ $this->widget('MenuBar');
             <tr> 
                 <td style="border-bottom: none; "><?php echo $form->labelEx($model, 'gl_date'); ?></td>
                 <td style="border-bottom: none;">
-<?php
-$this->widget('zii.widgets.jui.CJuiDatePicker', array(
-    'model' => $model,
-    'attribute' => 'gl_date',
-    // additional javascript options for the date picker plugin
-    'options' => array(
-        'showAnim' => 'fold',
-        'dateFormat' => 'dd-mm-yy',
-    ),
-    'htmlOptions' => array(
-        'style' => 'width:100px;',
-        'value' => '01-' . date('m-Y'),
-    ),
-));
-echo " to ";
-$this->widget('zii.widgets.jui.CJuiDatePicker', array(
-    'model' => $model,
-    'attribute' => 'gl_date',
-    'options' => array(
-        'showAnim' => 'fold',
-        'dateFormat' => 'dd-mm-yy',
-    ),
-    'htmlOptions' => array(
-        'style' => 'width:100px;',
-        'value' => date('d-m-Y'),
-        'id' => 'FicoGl_gl_date2',
-        'name' => 'FicoGl[gl_date2]',
-    ),
-));
+                    <?php
+                    $this->widget('zii.widgets.jui.CJuiDatePicker', array(
+                        'model' => $model,
+                        'attribute' => 'gl_date',
+                        // additional javascript options for the date picker plugin
+                        'options' => array(
+                            'showAnim' => 'fold',
+                            'dateFormat' => 'dd-mm-yy',
+                        ),
+                        'htmlOptions' => array(
+                            'style' => 'width:100px;',
+                            'value' => '01-' . date('m-Y'),
+                        ),
+                    ));
+                    echo " to ";
+                    $this->widget('zii.widgets.jui.CJuiDatePicker', array(
+                        'model' => $model,
+                        'attribute' => 'gl_date',
+                        'options' => array(
+                            'showAnim' => 'fold',
+                            'dateFormat' => 'dd-mm-yy',
+                        ),
+                        'htmlOptions' => array(
+                            'style' => 'width:100px;',
+                            'value' => date('d-m-Y'),
+                            'id' => 'FicoGl_gl_date2',
+                            'name' => 'FicoGl[gl_date2]',
+                        ),
+                    ));
 
-$this->widget('ext.mdmEui.MdmLinkButton', array(
-    'id' => 'srcBtn',
-    'text' => 'Find',
-    'htmlOptions' => array('iconCls' => 'icon-search', 'plain' => 'true', 'disabled' => 'disabled')
-));
-?>
+                    $this->widget('ext.mdmEui.MdmLinkButton', array(
+                        'id' => 'srcBtn',
+                        'text' => 'Find',
+                        'htmlOptions' => array('iconCls' => 'icon-search', 'plain' => 'true', 'disabled' => 'disabled')
+                    ));
+                    ?>
                 </td>
             </tr>
         </table>
-<?php $this->endWidget(); ?>
+        <?php $this->endWidget(); ?>
         <br/>
-<?php
+        <?php
 //{"idgldtl":"69","cdfigl":"GL11000011","cdfiacc":"1003","debit":"220000","kredit":"0","create_by":1,"create_date":"2012-05-05 16:54:34.967774","gl_date":"2012-05-05","dscrp":"Sales Retail"}
 
-$this->widget('mdmEui.grid.MdmEGrid', array(
-    'id' => 'dg',
-    'options' => array(
-        'pagination' => false,
-        'rownumbers' => false,
-        'onSelect' => 'js:function(index,row){clickRow(index,row);}',
-        'singleSelect' => true,
-        'fitColumns' => true,
-    ),
-    'columns' => array(
+        $this->widget('mdmEui.grid.MdmEGrid', array(
+            'id' => 'dg',
+            'options' => array(
+                'pagination' => false,
+                'rownumbers' => false,
+                'onSelect' => 'js:function(index,row){clickRow(index,row);}',
+                'singleSelect' => true,
+                'fitColumns' => true,
+            ),
+            'columns' => array(
 //                array('field' => 'cdunit', 'title' => 'Unit',
 //                    'htmlOptions' => array('width' => 60)),
-        array('field' => 'gl_date', 'title' => 'Tgl',
-            'htmlOptions' => array('width' => 100, 'align' => 'center')),
-        array('field' => 'cdfigl', 'title' => 'Kode',
-            'htmlOptions' => array('width' => 120, 'align' => 'left')),
-        array('field' => 'dscrp', 'title' => 'Deskripsi',
-            'htmlOptions' => array('width' => 280)),
+                array('field' => 'gl_date', 'title' => 'Tgl',
+                    'htmlOptions' => array('width' => 120, 'align' => 'center')),
+                array('field' => 'cdfigl', 'title' => 'Kode',
+                    'htmlOptions' => array('width' => 140, 'align' => 'right')),
+                array('field' => 'dscrp', 'title' => 'Deskripsi',
+                    'htmlOptions' => array('width' => 280)),
 //                array('field' => 'cdfiacc', 'title' => 'Acc Num',
-//                    'htmlOptions' => array('width' => 120)),
-//                array('field' => 'coadscrp', 'title' => 'Acc Desc',
-//                    'htmlOptions' => array('width' => 280)),
-        array('field' => 'debit', 'title' => 'Debit',
-            'htmlOptions' => array('width' => 150, 'align' => 'right')),
-        array('field' => 'kredit', 'title' => 'Kredit',
-            'htmlOptions' => array('width' => 150, 'align' => 'right')),
-    ),
-    'htmlOptions' => array(
-        'style' => "width:705px;height:350px",
-    )
-));
-?>
+//                    'htmlOptions' => array('width' => 100)),
+                array('field' => 'coadscrp', 'title' => 'Acc Desc',
+                    'htmlOptions' => array('width' => 280)),
+                array('field' => 'debit', 'title' => 'Debit',
+                    'htmlOptions' => array('width' => 120, 'align' => 'right')),
+                array('field' => 'kredit', 'title' => 'Kredit',
+                    'htmlOptions' => array('width' => 120, 'align' => 'right')),
+            ),
+            'htmlOptions' => array(
+                'style' => "width:705px;height:350px",
+            )
+        ));
+        
+//        {"type":"S","total":3,
+//                
+//                "rows":[
+//        {"idgldtl":"","cdfigl":"GL1100000001","cdfiacc":"","debit":"","kredit":"","create_by":"","create_date":"","gl_date":"10-07-2012","dscrp":"CREATE BY PURCASHING","cdunit":"1100","coadscrp":""},
+//        {"debit":"1,920,000","cdfigl":"GL1100000001","cdfiacc":"21001","dscrp":"Hutang Usaha\/Dagang","kredit":"-","idgldtl":"9","create_by":1,"create_date":"2012-07-10 14:30:52.171166","gl_date":"","cdunit":"","coadscrp":"Hutang Usaha\/Dagang"},
+//        {"debit":"-","cdfigl":"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GL1100000001","cdfiacc":"&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;11003","dscrp":"&nbsp;&nbsp;&nbsp;&nbsp;Persediaan","kredit":"1,920,000","idgldtl":"10","create_by":1,"create_date":"2012-07-10 14:30:52.171166","gl_date":"","cdunit":"","coadscrp":"Persediaan"}
+//        
+//        ]}
+        ?>
     </div><!-- form -->
 </div>

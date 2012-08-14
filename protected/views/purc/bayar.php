@@ -1,4 +1,3 @@
-
 <?php
 $ajaxcari = CHtml::ajax(array(
             'url' => array('fico/findHutang'),
@@ -39,17 +38,29 @@ Yii::app()->clientScript->registerScript('search', "
     $('#cancelBtn').linkbutton('disable'); 
     $('#saveBtn').linkbutton('disable'); 
         
-    $('#atree').tree({
+    $('#htree').tree({
         onClick:function(node){
                 var isChild = $('#atree').tree('isLeaf', node.target);                
                 if(!isChild) {
                     //goVendor(node.id);
-                    $(this).tree('toggle', node.target);      
+                    $(this).tree('toggle', node.target);
                 }
                 else goDetail(node.id);
         }
     });
-    
+            
+    function goDetail(nopo){   
+        $('#dgbayar').mdmegrid('loading');
+        var pnum = $.trim(nopo);
+        alert(pnum);
+//        $ajaxcari
+//        $('#dtlhutang').removeAttr('style');
+//        $('#hdrhutang').attr('style','display:none');
+//        $('#pohutang').removeAttr('style');        
+        $('#dgbayar').mdmegrid('loaded');
+        return;
+    }
+        
     $('#jmlbayar').keyup(function(){ 
         var jbayar = $('#jmlbayar').val();
         jbayar = jbayar.replace(/,/g, '');
@@ -76,17 +87,6 @@ Yii::app()->clientScript->registerScript('search', "
         
         return;
     });
-
-    function goDetail(nopo){        
-        $('#dgbayar').mdmegrid('loading');
-        var pnum = $.trim(nopo);
-        $ajaxcari
-        $('#dtlhutang').removeAttr('style');
-        $('#hdrhutang').attr('style','display:none');
-        $('#pohutang').removeAttr('style');        
-        $('#dgbayar').mdmegrid('loaded');
-        return;
-    }
     
     function goVendor(idvendor){
        $('#hdrhutang').removeAttr('style');
@@ -166,16 +166,23 @@ $this->widget('MenuBar');
             'notificationShowAt' => 'topRight',
         ));
         ?>
-        <div style="float:left; width: 170px; min-height: 400px; padding-right: 10px;">
+        <div style="float:left; width: 200px; padding-right: 10px;">
             <?php
             $this->widget('mdmEui.MjbTree', array(
-                'id' => 'atree',
-                'dataUrl' => 'fico/vendorPO'
+                'id' => 'htree',
+                'dataUrl' => 'fico/hutangTree'
             ));
             ?>
         </div>
-        <div style="float:left; width: 470px; padding-left: 10px; border-left: .04em grey solid;  ">
+        <div style="float:left; width: 440px; padding-left: 10px; border-left: .04em grey solid;  ">
             <div id="pohutang">
+
+                <?php
+                $this->beginWidget('CActiveForm', array(
+                    'id' => 'fico-bayar-form',
+                    'enableAjaxValidation' => false,
+                ));
+                ?>
                 <table width="110%">
                     <tr>
                         <td width="23%">PO Number</td>
@@ -197,13 +204,7 @@ $this->widget('MenuBar');
                     </tr>
                 </table>
                 <br/>
-                <?php
-                $this->beginWidget('CActiveForm', array(
-                    'id' => 'fico-bayar-form',
-                    'enableAjaxValidation' => false,
-                ));
-                ?>
-                <div style="padding-top: .5em; padding-left: .5em; width: 33.45em;" class="span-15">
+                <div style="padding-top: .5em; padding-left: .5em; width: 108%; " class="span-15">
                     Dibayar (Rp)
                     <?php
                     $this->widget('ext.moneymask.MMask', array(
@@ -233,7 +234,7 @@ $this->widget('MenuBar');
                     'htmlOptions' => array(
                         //'rownumbers' => "true",
                         'fitColumns' => "true",
-                        'style' => "width:517px;height:240px;",
+                        'style' => "width:485px;height:240px;",
                     ),
                     'columns' => array(
                         array('field' => 'create_date', 'title' => 'Tgl Bayar',

@@ -3,8 +3,8 @@ $ajaxcari = CHtml::ajax(array(
             'url' => array('findPO'),
             'data' => array('pnum' => 'js:pnum'),
             'type' => 'POST',
-            'success' => 'js:function(r){suksesCari(r,\'create\');}',
-            'error' => 'js:function(r){failedCari(r,\'create\');}'
+            'success' => 'js:function(r){suksesCari(r,\'cari\');}',
+            'error' => 'js:function(r){failedCari(r,\'cari\');}'
         ));
 
 $ajaxunit = CHtml::ajax(array(
@@ -25,7 +25,7 @@ $ajaxstatus = CHtml::ajax(array(
             'url' => array('findStatus'),
             'data' => array('status' => 'js:status'),
             'type' => 'POST',
-            'success' => 'js:function(r){suksesCStatus(r,\'create\');}'
+            'success' => 'js:function(r){suksesCStatus(r,\'create\');}', 
         ));
 
 $ajaxvendor = CHtml::ajax(array(
@@ -136,7 +136,15 @@ function reloadExec(){
              
 function failedCari(r,sender){
     //change and lock unit, whse 
-    alert('tidak ketemu');
+    $('#StatusBar').jnotifyAddMessage({
+                text: 'PO tidak ditemukan',
+                permanent: false,
+                showIcon: true,
+                type: 'error'
+            });
+        var kosong = [];
+        $('#dg').mdmegrid('loadData',kosong);
+        setTimeout(reloadExec, 3000);
     return;      
 }
 
@@ -157,10 +165,15 @@ function suksesCVendor(r,sender){
 }
         
 function failedCVendor(r,sender){
-    alert(r);
+    $('#StatusBar').jnotifyAddMessage({
+            text: ''+r+'',
+            permanent: true,
+            showIcon: true,
+            type: 'success'
+        });
 }
  
-function suksesUpdate(r,sender){         
+function suksesUpdate(r,sender){
     var ret = JSON.parse(r);
     if(ret.type == 'S'){  
         $('#StatusBar').jnotifyAddMessage({
@@ -303,11 +316,11 @@ function clickRow(index,row){
     SelIndex = index;
 }
              
-function sukses(r,sender){        
+function sukses(r,sender){   
     var ret = JSON.parse(r);        
     if(ret.type == 'S'){  
         $('#StatusBar').jnotifyAddMessage({
-            text: ''+ret.message+'',
+            text: 'Success: '+ret.message+'',
             permanent: true,
             showIcon: true,
             type: 'success'
@@ -316,23 +329,28 @@ function sukses(r,sender){
         $('#InvpurchHdr_purch_num').val(ret.val);
     }else if(ret.type == 'W'){
         $('#StatusBar').jnotifyAddMessage({
-            text: ''+ret.message+'',
+            text: 'Warning: '+ret.message+'',
             permanent: false,
             showIcon: true,
             type: 'info'
         });
     }else if(ret.type == 'E'){
         var msg = ret.message;   
-        var msgtodispaly = '';
+        var msgtodispaly = '';        
         if(typeof msg.cdunit != 'undefined'){ msgtodispaly = msg.cdunit; }
         else if(typeof msg.cdwhse != 'undefined'){ msgtodispaly = msg.cdwhse;}
         else if(typeof msg.refnum != 'undefined'){ msgtodispaly = msg.refnum;}
         else if(typeof msg.date_gr != 'undefined'){ msgtodispaly = msg.date_gr;}
-        else if(typeof msg.id_periode != 'undefined'){ msgtodispaly = msg.id_periode;}
+        else if(typeof msg.id_periode != 'undefined'){ msgtodispaly = msg.id_periode;}        
+        else if(typeof msg.cdvend != 'undefined'){ msgtodispaly = msg.cdvend;}
+        else if(typeof msg.status != 'undefined'){ msgtodispaly = msg.status;}       
+        else if(typeof msg.bill_num != 'undefined'){ msgtodispaly = msg.bill_num;}        
+        else if(typeof msg.gr_num != 'undefined'){ msgtodispaly = msg.gr_num;}       
+        else if(typeof msg.purch_num != 'undefined'){ msgtodispaly = msg.purch_num;}
         else { msgtodispaly = ret.message; }
         if(msgtodispaly != ''){
             $('#StatusBar').jnotifyAddMessage({
-                text: ''+msgtodispaly+'',
+                text: 'Error: '+msgtodispaly+'',
                 permanent: false,
                 showIcon: true,
                 type: 'error'
@@ -341,7 +359,7 @@ function sukses(r,sender){
         return;
     }else{
         $('#StatusBar').jnotifyAddMessage({
-                text: ''+r+'',
+                text: 'Undefined error: '+r+'',
                 permanent: false,
                 showIcon: true,
                 type: 'info'
@@ -351,6 +369,7 @@ function sukses(r,sender){
 }        
       
 function failed(r,sender){
+    alert(r);
     $('#StatusBar').jnotifyAddMessage({
         text: 'Failed on '+ sender +' PO',
         permanent: false,
@@ -534,7 +553,7 @@ $this->widget('MenuBar');
                 <td>
                     <?php
                     //echo $form->textField($model, 'status'); 
-                    $listnyo = CHtml::listData(Mdvendor::model()->FindAll('cdvendcat=:cdvendcat', array(':cdvendcat' => '10')), 'cdvend', 'dscrp');
+                    $listnyo = CHtml::listData(Mdvendor::model()->FindAll('cdvendcat=:cdvendcat', array(':cdvendcat' => 'V01')), 'cdvend', 'dscrp');
                     echo CHtml::activeDropDownList($model, 'cdvend', $listnyo);
                     ?>
                 </td>
@@ -542,7 +561,7 @@ $this->widget('MenuBar');
                 <td>
                     <?php
                     //echo $form->textField($model, 'status'); 
-                    $listnyo = CHtml::listData(Vlookup::model()->FindAll('groupv=:groupv', array(':groupv' => 'purch_status')), 'cdlookup', 'dscrp');
+                    $listnyo = CHtml::listData(Vlookup::model()->FindAll("groupv=:groupv AND trim(cdlookup) <> '-1'  AND trim(cdlookup) <> '2' ", array(':groupv' => 'purch_status')), 'cdlookup', 'dscrp');
                     echo CHtml::activeDropDownList($model, 'status', $listnyo);
                     echo CHtml::hiddenField('InvpurchHdr[oldstatus]', '0', array('id' => 'oldstatus', 'size' => '2'));
                     ?>

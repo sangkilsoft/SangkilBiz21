@@ -64,7 +64,7 @@ class FicoPeriode extends CActiveRecord {
     public function attributeLabels() {
         return array(
             'id_periode' => 'Id Periode',
-            'nmperiode' => 'Nmperiode',
+            'nmperiode' => 'Periode/Thn',
             'date_fr' => 'Date Fr',
             'date_to' => 'Date To',
             'is_active' => 'Is Active',
